@@ -75,6 +75,7 @@ window.addEventListener("load", function () {
     }
 
     var draging = null;
+    var dragTouchId = null;
     var draglock = false;
     function isFired (body) {
         return body.label == "fire";
@@ -96,29 +97,53 @@ window.addEventListener("load", function () {
         });
     });
     document.body.addEventListener("mousedown", function (evt) {
+        evt.preventDefault();
         if (draglock)
             return;
-        evt.preventDefault();
         draging = calcWorldPoint(evt.clientX, evt.clientY);
     });
+    function createFire (clientX, clientY) {
+        var forceScale = 1/3;
+        var worldpt = calcWorldPoint(clientX, clientY);
+        var force = {x: (worldpt.x - draging.x) * forceScale, y: (worldpt.y - draging.y) * forceScale};
+        var fire = Matter.Bodies.circle(draging.x, draging.y, 15, {
+            density: 3,
+            label: "fire",
+            render: {
+                fillStyle: "#000",
+                strokeStyle: "transparent"
+            },
+            restitution: 1
+        });
+        Matter.Body.applyForce(fire, draging, force);
+        Matter.Composite.add(engine.world, fire);
+        draging = null;
+    }
     document.body.addEventListener("mouseup", function (evt) {
         evt.preventDefault();
-        var forceScale = 1/3;
         if (draging) {
-            var worldpt = calcWorldPoint(evt.clientX, evt.clientY);
-            var force = {x: (worldpt.x - draging.x) * forceScale, y: (worldpt.y - draging.y) * forceScale};
-            var fire = Matter.Bodies.circle(draging.x, draging.y, 15, {
-                density: 3,
-                label: "fire",
-                render: {
-                    fillStyle: "#000",
-                    strokeStyle: "transparent"
-                },
-                restitution: 1
+            createFire(evt.clientX, evt.clientY);
+        }
+    });
+    document.body.addEventListener("touchstart", function (evt) {
+        evt.preventDefault();
+        if (evt.touches.length == 1 && !draglock) {
+            var touchInvolved = evt.touches[0];
+            draging = calcWorldPoint(touchInvolved.clientX, touchInvolved.clientY);
+            dragTouchId = touchInvolved.identifier;
+        }
+    });
+    document.body.addEventListener("touchend", function (evt) {
+        evt.preventDefault();
+        if (draging && dragTouchId !== null) {
+            Array.prototype.find.call(evt.changedTouches, function (touch) {
+                if (dragTouchId !== null && touch.identifier == dragTouchId) {
+                    dragTouchId = null;
+                    createFire(touch.clientX, touch.clientY);
+                    return true;
+                }
+                return false;
             });
-            Matter.Body.applyForce(fire, draging, force);
-            Matter.Composite.add(engine.world, fire);
-            draging = null;
         }
     });
 
