@@ -163,8 +163,8 @@ window.addEventListener("load", function () {
     wall(sceneWid - 10, -500, sceneWid, sceneHig + 500);
 
     function startGame (over) {
-        var dest = Matter.Bodies.circle(Math.random() * (sceneWid - 20) + 10, 0, 20, {
-            density: 1,
+        var dest = Matter.Bodies.circle(Math.random() * (sceneWid - 20) + 10, sceneHig, 30, {
+            density: 0.5,
             label: "dest",
             render: {
                 fillStyle: "#0b0",
@@ -172,6 +172,9 @@ window.addEventListener("load", function () {
             },
             restitution: 1
         });
+        setTimeout(function () {
+            Matter.Body.applyForce(dest, dest.position, {x: 0, y: -100});
+        }, 100);
         Matter.Composite.add(engine.world, dest);
         Matter.Events.on(dest, "beforeFallOut", function () {
             over();
@@ -223,5 +226,7 @@ window.addEventListener("load", function () {
 
     Matter.Engine.run(engine);
 
-    startGame(overHandle);
+    setTimeout(function () {
+        startGame(overHandle);
+    }, 100);
 });
