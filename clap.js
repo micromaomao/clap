@@ -76,7 +76,6 @@ window.addEventListener("load", function () {
 
     var draging = null;
     var draglock = false;
-    var stopTimeScaleAnimation = true;
     function isFired (body) {
         return body.label == "fire";
     }
@@ -101,8 +100,6 @@ window.addEventListener("load", function () {
             return;
         evt.preventDefault();
         draging = calcWorldPoint(evt.clientX, evt.clientY);
-        draglock = true;
-        engine.timing.timeScale = 0.8;
     });
     document.body.addEventListener("mouseup", function (evt) {
         evt.preventDefault();
@@ -121,23 +118,6 @@ window.addEventListener("load", function () {
             });
             Matter.Body.applyForce(fire, draging, force);
             Matter.Composite.add(engine.world, fire);
-            var mag = Math.sqrt(Math.pow(force.x, 2) + Math.pow(force.y, 2));
-            if (mag >= 10) {
-                function setTimeScaleD (d) {
-                    engine.timing.timeScale += d;
-                    return stopTimeScaleAnimation || !draglock;
-                }
-                stopTimeScaleAnimation = false;
-                animate(setTimeScaleD, engine.timing.timeScale, 1, 0.3, Math.min(mag * 2, 1500), easing.singlePower(1/mag), function () {
-                    animate(setTimeScaleD, engine.timing.timeScale, engine.timing.timeScale, 1, 100, easing.singlePower(3), function () {
-                        draglock = false;
-                        stopTimeScaleAnimation = true;
-                    });
-                });
-            } else {
-                draglock = false;
-                engine.timing.timeScale = 1;
-            }
             draging = null;
         }
     });
