@@ -202,7 +202,7 @@ window.addEventListener("load", function () {
         //   => max.x - min.x = wid / scaleR
         //   => max.x = wid / scaleR + min.x
         //   && max.y = hig / scaleR + min.y
-        
+
         // translate(-min.x, -min.y)
         //   => -min.x = offX
         //   => min.x = -offX
